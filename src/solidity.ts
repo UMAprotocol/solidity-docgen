@@ -341,7 +341,7 @@ function parseNatSpec(doc: string): NatSpec {
       setOrAppend(res, 'devdoc', content); 
     }
     if (tag === 'notice') {
-      setOrAppend(res, 'userdoc', content);
+      setOrAppend(res, 'devdoc', content);
     }
     if (tag === 'title') {
       res.title = content;
