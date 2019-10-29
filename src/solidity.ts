@@ -177,7 +177,7 @@ abstract class SolidityContractItem implements Linkable {
     astNode: solc.ast.ContractItem,
   ) { }
 
-  protected abstract astNode: solc.ast.ContractItem;
+  public abstract astNode: solc.ast.ContractItem;
 
   get name(): string {
     return this.astNode.name;
@@ -203,18 +203,38 @@ abstract class SolidityContractItem implements Linkable {
   }
 
   get natspec(): NatSpec {
-    if (this.astNode.documentation === null) {
+    // if (this.astNode.documentation === null) {
+    //   return {};
+    // }
+
+    const collidingDocs = [];
+
+    for (const item of this.contract.inheritedItems ? this.contract.inheritedItems : []) {
+      const functions = item.contract.functions ? item.contract.functions : [];
+      const modifiers = item.contract.modifiers ? item.contract.modifiers : [];
+      const events = item.contract.events ? item.contract.events : [];
+
+      const allInheritedElements = [...functions, ...modifiers, ...events];
+
+      for (const element of allInheritedElements) {
+        if (element.signature === this.signature && element.astNode.documentation !== null) {
+          collidingDocs.push(element.astNode.documentation);
+        }
+      }
+    }
+
+    if (collidingDocs.length === 0) {
       return {};
     }
 
-    return parseNatSpec(this.astNode.documentation);
+    return parseNatSpec([collidingDocs].join("\n"));
   }
 }
 
 class SolidityFunction extends SolidityContractItem {
   constructor(
     contract: SolidityContract,
-    protected readonly astNode: solc.ast.FunctionDefinition,
+    public readonly astNode: solc.ast.FunctionDefinition,
   ) {
     super(contract, astNode);
   }
@@ -240,7 +260,7 @@ class SolidityFunction extends SolidityContractItem {
 class SolidityEvent extends SolidityContractItem {
   constructor(
     contract: SolidityContract,
-    protected readonly astNode: solc.ast.EventDefinition,
+    public readonly astNode: solc.ast.EventDefinition,
   ) {
     super(contract, astNode);
   }
@@ -249,7 +269,7 @@ class SolidityEvent extends SolidityContractItem {
 class SolidityModifier extends SolidityContractItem {
   constructor(
     contract: SolidityContract,
-    protected readonly astNode: solc.ast.ModifierDefinition,
+    public readonly astNode: solc.ast.ModifierDefinition,
   ) {
     super(contract, astNode);
   }
@@ -329,10 +349,10 @@ function parseNatSpec(doc: string): NatSpec {
   // reverse engineered from solc behavior...
   const raw = doc.replace(/\n\n?^[ \t]*\*[ \t]*/mg, '\n\n');
 
-  const untagged = raw.match(/^(?:(?!^@\w+ )[^])+/m);
-  if (untagged) {
-    setOrAppend(res, 'userdoc', untagged[0]);
-  }
+  // const untagged = raw.match(/^(?:(?!^@\w+ )[^])+/m);
+  // if (untagged) {
+  //   setOrAppend(res, 'userdoc', untagged[0]);
+  // }
 
   const tagMatches = execall(/^@(\w+) ((?:(?!^@\w+ )[^])*)/gm, raw);
   for (const m of tagMatches) {

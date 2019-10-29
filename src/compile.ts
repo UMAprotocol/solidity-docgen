@@ -37,7 +37,7 @@ export async function compile(
     settings: { ...solcSettings, outputSelection },
   };
 
-  const solcOutput = solc.compile(solcInput);
+  const solcOutput = solc.compile(solcInput, directory);
 
   const { errors: allErrors } = solcOutput;
   if (allErrors && allErrors.some(e => e.severity === 'error')) {
@@ -58,10 +58,20 @@ class SolcAdapter {
 
   constructor(private readonly solc: any) { }
 
-  compile(input: object): SolcOutput {
+  compile(input: object, directory: string): SolcOutput {
     const inputJSON = JSON.stringify(input);
 
-    const solcOutputString = this.solc.compileStandardWrapper(inputJSON);
+    const findImports = (file: string) => {
+      if (file.startsWith("@")) {
+        const resolvedFile = path.normalize(path.join(directory, "../../node_modules/", file));
+        return { contents: fs.readFileSync(resolvedFile, 'utf8') };
+      } else {
+        const resolvedFile = path.normalize(path.join(directory, file));
+        return { contents: fs.readFileSync(resolvedFile, 'utf8') };
+      }
+    };
+
+    const solcOutputString = this.solc.compileStandardWrapper(inputJSON, findImports);
     const solcOutput = JSON.parse(solcOutputString);
 
     if (semver.satisfies(this.solc.version(), '^0.4')) {
