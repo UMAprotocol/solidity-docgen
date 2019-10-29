@@ -91,9 +91,15 @@ type SolidityImport = { contents: string } | { error: string };
 
 function importCallback(path: string): SolidityImport {
   try {
-    return {
-      contents: fs.readFileSync(path, 'utf8'),
-    };
+    if (path.startsWith("@")) {
+      return {
+        contents: fs.readFileSync("./node_modules/" + path, 'utf8'),
+      };
+    } else {
+      return {
+        contents: fs.readFileSync(path, 'utf8'),
+      };
+    }
   } catch (e) {
     return {
       error: e.message,

@@ -26,6 +26,9 @@ H.registerHelper({
     },
     or: function () {
         return [...arguments].slice(0, -1).some(Boolean);
+    },
+    ecb: function (input) {
+        return input.replace("]", "\\]");
     }
 });
 

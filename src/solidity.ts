@@ -382,12 +382,12 @@ interface NatSpec {
   }[];
 }
 
-function parseNatSpec(doc: string): NatSpec {
+function parseNatSpec(doc: any): NatSpec {
   const res: NatSpec = {};
 
   // fix solc buggy parsing of doc comments
   // reverse engineered from solc behavior...
-  const raw = doc.replace(/\n\n?^[ \t]*(?:\*|\/\/\/)/mg, '\n\n').replace(/^[ \t]*/mg, '');
+  const raw = doc.text.replace(/\n\n?^[ \t]*(?:\*|\/\/\/)/mg, '\n\n').replace(/^[ \t]*/mg, '');
 
   const tagMatches = execall(/^(?:@(\w+) )?((?:(?!^@\w+ )[^])*)/m, raw);
 
