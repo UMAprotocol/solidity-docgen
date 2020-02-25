@@ -203,31 +203,33 @@ abstract class SolidityContractItem implements Linkable {
   }
 
   get natspec(): NatSpec {
-    // if (this.astNode.documentation === null) {
-    //   return {};
-    // }
-
-    const collidingDocs = [];
-
-    for (const item of this.contract.inheritedItems ? this.contract.inheritedItems : []) {
-      const functions = item.contract.functions ? item.contract.functions : [];
-      const modifiers = item.contract.modifiers ? item.contract.modifiers : [];
-      const events = item.contract.events ? item.contract.events : [];
-
-      const allInheritedElements = [...functions, ...modifiers, ...events];
-
-      for (const element of allInheritedElements) {
-        if (element.signature === this.signature && element.astNode.documentation !== null) {
-          collidingDocs.push(element.astNode.documentation);
-        }
-      }
-    }
-
-    if (collidingDocs.length === 0) {
+    if (this.astNode.documentation === null) {
       return {};
     }
 
-    return parseNatSpec([collidingDocs].join("\n"));
+    // const collidingDocs = [];
+
+    // for (const item of this.contract.inheritedItems ? this.contract.inheritedItems : []) {
+    //   const functions = item.contract.functions ? item.contract.functions : [];
+    //   const modifiers = item.contract.modifiers ? item.contract.modifiers : [];
+    //   const events = item.contract.events ? item.contract.events : [];
+
+    //   const allInheritedElements = [...functions, ...modifiers, ...events];
+
+    //   for (const element of allInheritedElements) {
+    //     if (element.signature === this.signature && element.astNode.documentation !== null) {
+    //       collidingDocs.push(element.astNode.documentation);
+    //     }
+    //   }
+    // }
+
+    // if (collidingDocs.length === 0) {
+    //   return {};
+    // }
+
+    // return parseNatSpec([collidingDocs].join("\n"));
+
+    return parseNatSpec(this.astNode.documentation);
   }
 }
 
